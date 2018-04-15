@@ -20,4 +20,5 @@ class Business: Codable {
     let RatingDate: String
     let Longitude: String
     let Latitude: String
+    let DistanceKM: String?
 }

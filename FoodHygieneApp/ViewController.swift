@@ -11,7 +11,6 @@ import MapKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
     @IBOutlet weak var tableView: UITableView!
-    
     // clear search results and display businesses around user again
     @IBAction func resetLocationButton(_ sender: Any) {
         loadUserLocation()
@@ -39,7 +38,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let userQuery = searchboxInput.text!.replacingOccurrences(of: " ", with: "%20") // encode spaces for URL
             generateQuery(op: "name", param1: userQuery, param2: "")
         } else { // search by business postcode
-            let userQuery = searchboxInput.text!.replacingOccurrences(of: " ", with: "") // search by first part of postcode only
+            let userQuery = searchboxInput.text!.replacingOccurrences(of: " ", with: "%20")
             generateQuery(op: "postcode", param1: userQuery, param2: "")
         }
         searchBoxDisplay.isHidden = true
@@ -48,10 +47,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // an enumerator to keep track the user's query
     // main use is to ensure that business map only displays business around user
-    enum queryType { case userLocation, businessName, businessPostcode }
+    enum queryType {
+        case userLocation, businessName, businessPostcode
+    }
     var currentQuery = queryType.userLocation
     
     var businessList = [Business]() // empty business object array
+    var businessMapList = [Business]() // seperate array for local businesses to use with map
+    
     let locationManager = CLLocationManager()
     
     override func viewDidLoad() {
@@ -103,13 +106,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let url = "http://radikaldesign.co.uk/sandbox/hygiene.php?op=s_"
         
         if op == "loc" { // user location query
-            if currentQuery != .userLocation { currentQuery = .userLocation }
+            if currentQuery != .userLocation {
+                currentQuery = .userLocation
+            }
             getBusinessData(query: "\(url)loc&lat=\(param1)&long=\(param2!)")
         } else if op == "name" { // business name query
-            if currentQuery != .businessName { currentQuery = .businessName }
+            if currentQuery != .businessName {
+                currentQuery = .businessName
+            }
             getBusinessData(query: "\(url)name&name=\(param1)")
         } else if op == "postcode" { // business postcode query
-            if currentQuery != .businessPostcode { currentQuery = .businessPostcode }
+            if currentQuery != .businessPostcode {
+                currentQuery = .businessPostcode
+            }
             getBusinessData(query: "\(url)postcode&postcode=\(param1)")
         }
     }
@@ -121,9 +130,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // configure URLSession
         URLSession.shared.dataTask(with: url!) { (data, response, error) in
             
-            guard let data = data else { print("error with data"); return }
+            guard let data = data else {
+                print("error with data")
+                return
+            }
             do {
-                self.businessList = try JSONDecoder().decode([Business].self, from: data);
+                if (self.currentQuery == .userLocation) {
+                    self.businessMapList = try JSONDecoder().decode([Business].self, from: data)
+                }
+                self.businessList = try JSONDecoder().decode([Business].self, from: data)
                 
                 // interrupt main thread to update table with retreived data
                 DispatchQueue.main.async {
@@ -167,7 +182,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let bmvc = segue.destination as! BusinessMapViewController
             bmvc.latitude = latitude
             bmvc.longitude = longitude
-            bmvc.businessList = self.businessList
+            bmvc.businessMapList = self.businessMapList
         }
     }
+    
 }

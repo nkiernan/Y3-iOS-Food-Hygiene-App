@@ -11,11 +11,10 @@ import MapKit
 
 class BusinessMapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var businessMapView: MKMapView!
-    
     // information passed from ViewController via segue
     var latitude: Double!
     var longitude: Double!
-    var businessList = [Business]()
+    var businessMapList = [Business]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,19 +33,14 @@ class BusinessMapViewController: UIViewController, MKMapViewDelegate {
         let userAnnotation = CustomPin()
         userAnnotation.coordinate = location
         businessMapView.addAnnotation(userAnnotation)
-        let userLocation = CLLocation(latitude: latitude!, longitude: longitude!)
         
         // add each business to map as annotion
-        for b in businessList {
+        for b in businessMapList {
             let annotation = CustomPin()
             annotation.image = UIImage(named: "pin\(b.RatingValue)")
             annotation.coordinate = CLLocationCoordinate2DMake(Double(b.Latitude)!, Double(b.Longitude)!)
             annotation.title = b.BusinessName
-            
-            // calculate distance between user and business
-            let businessLocation = CLLocation(latitude: Double(b.Latitude)!, longitude: Double(b.Longitude)!)
-            annotation.subtitle = "\(Double(round(100 * ((userLocation.distance(from: businessLocation)) / 1000)) / 100))km away"
-            
+            annotation.subtitle = "\(b.DistanceKM!)km away"
             businessMapView.addAnnotation(annotation)
         }
     }
@@ -69,4 +63,5 @@ class BusinessMapViewController: UIViewController, MKMapViewDelegate {
         annotationView!.image = customPointAnnotation.image
         return annotationView
     }
+    
 }

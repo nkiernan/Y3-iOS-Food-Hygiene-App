@@ -14,7 +14,6 @@ class BusinessDetailsViewController: UIViewController, MKMapViewDelegate {
     var latitude: Double!
     var longitude: Double!
     var business: Business!
-    
     // outlets corresponding to selected business's details
     @IBOutlet weak var businessNameLabel: UILabel!
     @IBOutlet weak var addressLine1Label: UILabel!
@@ -51,16 +50,10 @@ class BusinessDetailsViewController: UIViewController, MKMapViewDelegate {
         let userAnnotation = CustomPin()
         userAnnotation.coordinate = location
         businessLocationMap.addAnnotation(userAnnotation)
-        let userLocation = CLLocation(latitude: latitude!, longitude: longitude!)
         let annotation = CustomPin()
         annotation.image = UIImage(named: "pin\(business.RatingValue)")
         annotation.coordinate = CLLocationCoordinate2DMake(Double(business!.Latitude)!, Double(business!.Longitude)!)
         annotation.title = business!.BusinessName
-        
-        // calculate distance between user and business
-        let businessLocation = CLLocation(latitude: Double(business!.Latitude)!, longitude: Double(business!.Longitude)!)
-        annotation.subtitle = "\(Double(round(100 * ((userLocation.distance(from: businessLocation)) / 1000)) / 100))km away"
-        
         businessLocationMap.addAnnotation(annotation)
     }
     
@@ -82,4 +75,5 @@ class BusinessDetailsViewController: UIViewController, MKMapViewDelegate {
         annotationView!.image = customPointAnnotation.image
         return annotationView
     }
+    
 }
